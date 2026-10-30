@@ -1,5 +1,7 @@
 # UL Printer Management Dashboard
 
+<img width="1919" height="1079" alt="Screenshot 2026-07-31 084736" src="https://github.com/user-attachments/assets/938ca52d-8ad2-4b40-9f5b-d4e810005ca3" />
+
 A lightweight, real-time dashboard for monitoring **20–25 network printers** (HP and Canon) across an organization's offices. It runs entirely on **localhost** — no database, no cloud hosting. Online/Offline status is checked every **60 seconds** via ICMP ping, while the heavier toner and maintenance-kit SNMP read runs every **15 minutes** — see "Refresh timing" below for why they're split.
 
 ---
