@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UL Printer Management Dashboard</title>
+
+  <!-- Bootstrap 5 (served locally from public/vendor/bootstrap - see scripts/copy-assets.js) -->
+  <link href="/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Corporate typeface -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Custom Dashboard Styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- ==================== Header ==================== -->
+  <header class="dashboard-header">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 py-3">
+
+        <div class="d-flex align-items-center gap-3">
+          <div class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>
+          </div>
+          <div>
+            <h1 class="dashboard-title mb-0">UL Printer Management Dashboard</h1>
+            <p class="dashboard-subtitle mb-0">Real-time fleet monitoring &middot; SNMP + ICMP</p>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <!-- Fleet summary chips -->
+          <div class="summary-chip">
+            <span class="dot dot-online"></span>
+            <span id="onlineCount">0</span> Online
+          </div>
+          <div class="summary-chip">
+            <span class="dot dot-offline"></span>
+            <span id="offlineCount">0</span> Offline
+          </div>
+          <div class="summary-chip">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M5.5 5.5 4 4"/></svg>
+            <span id="lastRefreshLabel">Never refreshed</span>
+          </div>
+          <button id="themeToggleBtn" type="button" class="theme-toggle-btn" title="Switch between light and dark mode" aria-label="Toggle light/dark mode">
+            <svg class="icon-sm theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8 6 18M18 6l1.8-1.8"/></svg>
+            <svg class="icon-sm theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Add Printer bar -->
+      <form id="addPrinterForm" class="add-printer-bar mb-3" autocomplete="off">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+          </span>
+          <input
+            type="text"
+            id="newPrinterIp"
+            class="form-control border-start-0"
+            placeholder="Enter Printer IP (e.g. 192.168.1.20)"
+            required
+          />
+          <button class="btn btn-add-printer" type="submit">
+            <svg class="icon-sm me-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/><path d="M7 7h.01M7 17h.01"/></svg>
+            Add Printer
+          </button>
+        </div>
+        <div id="addPrinterFeedback" class="form-text mt-1"></div>
+      </form>
+    </div>
+  </header>
+
+  <!-- ==================== Main Content ==================== -->
+  <main class="container-fluid dashboard-main">
+
+    <!-- Empty state -->
+    <div id="emptyState" class="empty-state d-none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2 3h6l2-3h4"/><path d="M5 12 3 5h18l-2 7"/><path d="M3 12v6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-6"/></svg>
+      <p>No printers are currently being monitored.</p>
+      <p class="text-muted small">Add a printer above, or check that Survey.xlsx contains valid entries.</p>
+    </div>
+
+    <!-- Carousel -->
+    <div id="carouselWrapper" class="carousel-wrapper">
+      <div id="printerCarousel" class="carousel slide" data-bs-ride="false" data-bs-interval="false">
+        <div class="carousel-inner" id="carouselInner">
+          <!-- Slides injected by dashboard.js -->
+        </div>
+      </div>
+
+      <div class="carousel-controls">
+        <button id="prevSlideBtn" class="btn btn-nav" type="button">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+          Previous
+        </button>
+        <div id="slideIndicator" class="slide-indicator">Slide 1 of 1</div>
+        <button id="nextSlideBtn" class="btn btn-nav" type="button">
+          Next
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom-right refresh countdown widget -->
+  <div id="refreshCountdown" class="refresh-countdown">
+    <div class="countdown-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M12 6v4M12 10 6 16M12 10l6 6"/></svg>
+      <span class="countdown-label">Status check</span>
+      <span class="countdown-value" id="pingCountdown">--:--</span>
+    </div>
+    <div class="countdown-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3.5 4-6 7.2-6 10a6 6 0 0 0 12 0c0-2.8-2.5-6-6-10z"/></svg>
+      <span class="countdown-label">Toner &amp; kit update</span>
+      <span class="countdown-value" id="snmpCountdown">--:--</span>
+    </div>
+  </div>
+
+  <!-- Card template (cloned via JS) -->
+  <template id="printerCardTemplate">
+    <div class="col">
+      <div class="printer-card">
+
+        <!-- Decorative brand watermark (UL org mark) -->
+        <div class="brand-watermark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>
+        </div>
+
+        <div class="card-top">
+          <div class="vendor-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>
+            <span class="vendor-text"></span>
+          </div>
+          <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span class="status-label"></span>
+            <svg class="warning-icon-inline d-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg>
+          </div>
+        </div>
+
+        <h3 class="printer-name"></h3>
+        <p class="printer-model"></p>
+
+        <dl class="printer-meta">
+          <div class="meta-row">
+            <dt><svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16M8 4v16M11 4v16M14 4v16M17 4v10M20 4v16"/></svg> Serial</dt>
+            <dd class="serial-number"></dd>
+          </div>
+          <div class="meta-row">
+            <dt><svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.58 7-12a7 7 0 1 0-14 0c0 4.42 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> Location</dt>
+            <dd class="location"></dd>
+          </div>
+          <div class="meta-row">
+            <dt><svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M12 6v4M12 10 6 16M12 10l6 6"/></svg> IP Address</dt>
+            <dd><a href="#" target="_blank" class="ip-link"></a></dd>
+          </div>
+        </dl>
+
+        <!-- CMYK Toner - circular ring gauges (shown for color printers) -->
+        <div class="toner-gauges">
+          <div class="toner-gauge" data-channel="c">
+            <div class="gauge-ring">
+              <div class="gauge-ring-hole">
+                <span class="gauge-letter">C</span>
+                <span class="gauge-pct">N/A</span>
+              </div>
+            </div>
+          </div>
+          <div class="toner-gauge" data-channel="m">
+            <div class="gauge-ring">
+              <div class="gauge-ring-hole">
+                <span class="gauge-letter">M</span>
+                <span class="gauge-pct">N/A</span>
+              </div>
+            </div>
+          </div>
+          <div class="toner-gauge" data-channel="y">
+            <div class="gauge-ring">
+              <div class="gauge-ring-hole">
+                <span class="gauge-letter">Y</span>
+                <span class="gauge-pct">N/A</span>
+              </div>
+            </div>
+          </div>
+          <div class="toner-gauge" data-channel="k">
+            <div class="gauge-ring">
+              <div class="gauge-ring-hole">
+                <span class="gauge-letter">K</span>
+                <span class="gauge-pct">N/A</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Black-only toner fallback (shown for monochrome printers instead of the CMYK rings) -->
+        <div class="gauge-block toner-mono d-none">
+          <div class="gauge-label">
+            <span>
+              <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3.5 4-6 7.2-6 10a6 6 0 0 0 12 0c0-2.8-2.5-6-6-10z"/></svg>
+              Toner (Black)
+            </span>
+            <span class="toner-mono-pct">N/A</span>
+          </div>
+          <div class="progress custom-progress">
+            <div class="progress-bar toner-mono-bar" role="progressbar"></div>
+          </div>
+        </div>
+
+        <div class="gauge-block maintenance-block">
+          <div class="gauge-label">
+            <span>
+              <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg>
+              Maintenance Kit
+            </span>
+            <span class="maint-pct">N/A</span>
+          </div>
+          <div class="progress custom-progress">
+            <div class="progress-bar maint-bar" role="progressbar"></div>
+          </div>
+        </div>
+
+        <div class="last-seen d-none">
+          <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg>
+          Last seen: <span class="last-seen-value"></span>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Bootstrap 5 JS Bundle (served locally from public/vendor/bootstrap) -->
+  <script src="/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <!-- Dashboard Logic -->
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

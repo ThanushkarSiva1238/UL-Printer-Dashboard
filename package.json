@@ -1,0 +1,35 @@
+{
+  "name": "ul-printer-management-dashboard",
+  "version": "1.0.0",
+  "description": "A lightweight, real-time Printer Management Dashboard for monitoring HP and Canon network printers via SNMP and ICMP Ping.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "postinstall": "node scripts/copy-assets.js"
+  },
+  "keywords": [
+    "printer",
+    "snmp",
+    "dashboard",
+    "monitoring",
+    "express"
+  ],
+  "author": "UL IT Department",
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "net-snmp": "^3.11.2",
+    "ping": "^0.4.4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

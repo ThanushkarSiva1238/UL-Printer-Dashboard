@@ -1,0 +1,797 @@
+/* ============================================================================
+   UL Printer Management Dashboard — Custom Styles
+   ============================================================================
+   Design tokens (corporate / IT-operations aesthetic):
+     --ink        : #14213D  (deep navy — headers, primary text)
+     --signal     : #0E7C86  (teal — brand accent, focus states)
+     --paper      : #FFFFFF  (card + page background)
+     --mist       : #F4F6F9  (page canvas behind cards)
+     --line       : #E3E8F0  (hairline borders/dividers)
+     --online     : #1E9E63  (status green)
+     --offline    : #D64545  (status red)
+   Toner channel colors (used by the CMYK circular ring gauges):
+     --c-color: #00AEEF (Cyan)   --m-color: #EC008C (Magenta)
+     --y-color: #F2C200 (Yellow) --k-color: #2B2B2B (Black)
+   Typeface: IBM Plex Sans (display/body) + IBM Plex Mono (serials/IPs)
+   ============================================================================ */
+
+:root {
+  --ink: #14213d;
+  --ink-soft: #4a5a7a;
+  --signal: #0e7c86;
+  --signal-soft: #e4f3f4;
+  --paper: #ffffff;
+  --mist: #f4f6f9;
+  --line: #e3e8f0;
+  --online: #1e9e63;
+  --online-soft: #e7f7ef;
+  --offline: #d64545;
+  --offline-soft: #fdecec;
+
+  --c-color: #00aeef;
+  --m-color: #ec008c;
+  --y-color: #f2c200;
+  --k-color: #2b2b2b;
+
+  --radius-lg: 20px;
+  --radius-md: 12px;
+
+  /* Layered "3D" shadow recipe: a tight contact shadow + a soft ambient
+     shadow + a large diffuse shadow underneath, so cards read as sitting
+     above the page rather than flat against it. */
+  --shadow-3d: 0 1px 2px rgba(20, 33, 61, 0.08), 0 6px 10px rgba(20, 33, 61, 0.07),
+    0 20px 34px rgba(20, 33, 61, 0.10);
+  --shadow-3d-hover: 0 2px 4px rgba(20, 33, 61, 0.10), 0 12px 20px rgba(20, 33, 61, 0.12),
+    0 30px 48px rgba(20, 33, 61, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--mist);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+svg.icon-sm { width: 18px; height: 18px; flex-shrink: 0; }
+svg.icon-xs { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ---------------------------------------------------------------------- */
+/* Header                                                                  */
+/* ---------------------------------------------------------------------- */
+.dashboard-header {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.dashboard-header .container-fluid {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--ink) 0%, var(--signal) 130%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(20, 33, 61, 0.25);
+}
+.brand-mark svg { width: 26px; height: 26px; }
+
+.dashboard-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.dashboard-subtitle {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+.summary-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.95rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-online { background: var(--online); }
+.dot-offline { background: var(--offline); }
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mist);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+  background: var(--signal-soft);
+  transform: rotate(12deg);
+}
+.theme-toggle-btn svg { width: 19px; height: 19px; }
+.theme-toggle-btn .theme-icon-moon { display: none; }
+
+/* Add printer bar */
+.add-printer-bar {
+  max-width: 500px;
+}
+.add-printer-bar .input-group-text {
+  color: var(--ink-soft);
+}
+.add-printer-bar .form-control {
+  font-size: 1rem;
+}
+.add-printer-bar .form-control:focus {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 0.2rem rgba(14, 124, 134, 0.15);
+}
+.btn-add-printer {
+  background: var(--ink);
+  color: #fff;
+  border: 1px solid var(--ink);
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+.btn-add-printer:hover {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+#addPrinterFeedback {
+  font-size: 0.85rem;
+}
+#addPrinterFeedback.text-success { color: var(--online) !important; }
+#addPrinterFeedback.text-danger { color: var(--offline) !important; }
+
+/* ---------------------------------------------------------------------- */
+/* Main / Carousel                                                         */
+/* ---------------------------------------------------------------------- */
+.dashboard-main {
+  padding: 2rem 1em 3rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: var(--ink-soft);
+}
+.empty-state svg {
+  width: 3.25rem;
+  height: 3.25rem;
+  color: var(--line);
+  display: block;
+  margin: 0 auto 1rem;
+}
+.empty-state p {
+  font-size: 1.05rem;
+}
+
+.carousel-wrapper {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  padding: 1.25rem 0.25rem 0.75rem;
+  /* perspective enables genuine 3D rotation of child cards on hover */
+  perspective: 1200px;
+}
+
+@media (max-width: 1400px) {
+  .card-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.btn-nav {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.92rem;
+  border-radius: 999px;
+  padding: 0.55rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+.btn-nav:hover:not(:disabled) {
+  border-color: var(--signal);
+  color: var(--signal);
+  background: var(--signal-soft);
+}
+.btn-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.slide-indicator {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Printer Card — 3D                                                       */
+/* ---------------------------------------------------------------------- */
+.printer-card {
+  position: relative;
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3d);
+  border: 2px solid var(--online-soft);
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease,
+    transform 0.12s ease-out;
+  animation: cardFadeIn 0.35s ease both;
+  will-change: transform;
+}
+
+/* Glossy top sheen overlay to sell the "raised 3D surface" look */
+.printer-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 32%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.printer-card:hover {
+  box-shadow: var(--shadow-3d-hover);
+}
+
+.printer-card.status-online {
+  border-color: var(--online);
+}
+
+.printer-card.status-offline {
+  border-color: var(--offline);
+  background: linear-gradient(155deg, #fff6f6 0%, #ffe9e9 55%, #ffdcdc 100%);
+  box-shadow: 0 1px 2px rgba(214, 69, 69, 0.14), 0 8px 18px rgba(214, 69, 69, 0.16),
+    0 22px 38px rgba(214, 69, 69, 0.14);
+}
+.printer-card.status-offline:hover {
+  box-shadow: 0 2px 4px rgba(214, 69, 69, 0.18), 0 14px 24px rgba(214, 69, 69, 0.20),
+    0 30px 48px rgba(214, 69, 69, 0.20);
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(8px) rotateX(0deg); }
+  to { opacity: 1; transform: translateY(0) rotateX(0deg); }
+}
+
+/* Decorative faint brand watermark tucked in the card corner */
+.brand-watermark {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  width: 84px;
+  height: 84px;
+  color: var(--ink);
+  opacity: 0.045;
+  pointer-events: none;
+  transform: rotate(-8deg);
+}
+.brand-watermark svg { width: 100%; height: 100%; }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.vendor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.vendor-badge svg { width: 14px; height: 14px; }
+
+.vendor-badge.vendor-hp {
+  background: #eaf2ff;
+  border-color: #cfe1ff;
+  color: #0c5cbf;
+}
+.vendor-badge.vendor-canon {
+  background: #fdeceb;
+  border-color: #f8d0cc;
+  color: #c1272d;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-online .status-dot {
+  background: var(--online);
+  box-shadow: 0 0 0 3px var(--online-soft);
+}
+.status-online .status-label { color: var(--online); }
+
+.status-offline .status-dot {
+  background: var(--offline);
+  animation: blinkDot 1.1s infinite;
+}
+.status-offline .status-label { color: var(--offline); }
+
+@keyframes blinkDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+/* Alert icon shown right next to the "Offline" label itself */
+.warning-icon-inline {
+  width: 15px;
+  height: 15px;
+  color: var(--offline);
+  flex-shrink: 0;
+}
+
+.printer-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.25;
+  position: relative;
+  z-index: 1;
+}
+
+.printer-model {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.printer-meta {
+  margin: 0;
+  font-size: 0.88rem;
+  position: relative;
+  z-index: 1;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.28rem 0;
+  border-bottom: 1px dashed var(--line);
+}
+.meta-row:last-child { border-bottom: none; }
+
+.meta-row dt {
+  color: var(--ink-soft);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.meta-row dd {
+  margin: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--ink);
+  text-align: right;
+}
+
+.ip-link {
+  color: var(--signal);
+  text-decoration: none;
+  font-weight: 600;
+}
+.ip-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------- */
+/* CMYK Toner — circular progress ring gauges                             */
+/* ---------------------------------------------------------------------- */
+.toner-gauges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+  padding: 0.6rem 0.25rem;
+  background: var(--mist);
+  border-radius: var(--radius-md);
+}
+
+.toner-gauge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-ring {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--gcolor, var(--signal)) calc(var(--pct, 0) * 3.6deg),
+    var(--line) 0deg
+  );
+  transition: background 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-ring-hole {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--mist);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.toner-gauge.no-data .gauge-ring {
+  background: var(--line);
+}
+.toner-gauge.no-data .gauge-letter {
+  opacity: 0.45;
+}
+
+.gauge-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--gauge-letter-bg, var(--ink-soft));
+  margin-bottom: 2px;
+}
+.toner-gauge[data-channel="c"] .gauge-letter { background: var(--c-color); }
+.toner-gauge[data-channel="m"] .gauge-letter { background: var(--m-color); }
+.toner-gauge[data-channel="y"] .gauge-letter { background: var(--y-color); color: #4a3b00; }
+.toner-gauge[data-channel="k"] .gauge-letter { background: var(--k-color); }
+
+.gauge-pct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.gauge-pct.pct-low {
+  color: var(--offline) !important;
+  font-weight: 800;
+}
+
+.gauge-pct.pct-na {
+  color: #9aa5b8;
+  font-weight: 500;
+  font-style: italic;
+  font-size: 0.66rem;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Black-only toner fallback (monochrome printers)                        */
+/* ---------------------------------------------------------------------- */
+.toner-mono-pct.pct-low {
+  color: var(--offline);
+  font-weight: 800;
+}
+.toner-mono-pct.pct-na {
+  color: #9aa5b8;
+  font-weight: 500;
+  font-style: italic;
+}
+.progress-bar.toner-mono-bar.level-ok { background-color: var(--k-color); }
+.progress-bar.toner-mono-bar.level-low { background-color: var(--offline); }
+.progress-bar.toner-mono-bar.level-na { background-color: var(--line); }
+
+/* ---------------------------------------------------------------------- */
+/* Maintenance Kit gauge (single bar)                                      */
+/* ---------------------------------------------------------------------- */
+.gauge-block {
+  margin-top: 0.1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.gauge-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 0.3rem;
+}
+.gauge-label span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.maint-pct.pct-low {
+  color: var(--offline);
+  font-weight: 800;
+}
+.maint-pct.pct-na {
+  color: #9aa5b8;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.custom-progress {
+  height: 9px;
+  border-radius: 999px;
+  background: var(--mist);
+}
+
+.progress-bar.level-ok {
+  background-color: var(--online);
+}
+.progress-bar.level-low {
+  background-color: var(--offline);
+}
+.progress-bar.level-na {
+  background-color: var(--line);
+}
+
+.last-seen {
+  font-size: 0.8rem;
+  color: var(--offline);
+  font-weight: 500;
+  margin-top: -0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Refresh countdown widget (bottom-right)                                */
+/* ---------------------------------------------------------------------- */
+.refresh-countdown {
+  position: fixed;
+  right: 1em;
+  bottom: 1em;
+  z-index: 40;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3d);
+  padding: 0.65rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 195px;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.countdown-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.countdown-row svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--signal);
+}
+
+.countdown-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.countdown-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A gentle pulse on the value the instant a cycle completes and resets,
+   so it's visible that something actually just refreshed. */
+.countdown-value.just-refreshed {
+  color: var(--signal);
+  animation: countdownPulse 0.6s ease;
+}
+@keyframes countdownPulse {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 520px) {
+  .refresh-countdown {
+    right: 0.75em;
+    bottom: 0.75em;
+    min-width: 170px;
+    padding: 0.55rem 0.75rem;
+  }
+  .countdown-row { font-size: 0.72rem; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Utility                                                                 */
+/* ---------------------------------------------------------------------- */
+.d-none { display: none !important; }
+
+/* ============================================================================
+   Dark Mode
+   ============================================================================
+   Toggled by adding data-theme="dark" to <html> (see public/js/dashboard.js
+   for the toggle logic + localStorage persistence). Every color in this
+   file is driven by the CSS variables below, so overriding them here is
+   enough to re-theme the entire dashboard - no component-specific dark
+   rules needed except where a flat re-tint isn't quite right (noted below).
+   ============================================================================ */
+:root[data-theme='dark'] {
+  --ink: #eaf1ff;
+  --ink-soft: #92a3c4;
+  --signal: #3fd0da;
+  --signal-soft: rgba(63, 208, 218, 0.14);
+  --paper: #1a2233;
+  --mist: #10151f;
+  --line: #2b3650;
+  --online: #33d489;
+  --online-soft: rgba(51, 212, 137, 0.14);
+  --offline: #ff6b6b;
+  --offline-soft: rgba(255, 107, 107, 0.14);
+
+  --c-color: #36c5f0;
+  --m-color: #ff5fa8;
+  --y-color: #f2c200;
+  --k-color: #d7dceb;
+
+  --shadow-3d: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 14px rgba(0, 0, 0, 0.32),
+    0 20px 36px rgba(0, 0, 0, 0.28);
+  --shadow-3d-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 14px 24px rgba(0, 0, 0, 0.36),
+    0 30px 50px rgba(0, 0, 0, 0.32);
+}
+
+/* Toggle button icon swap (sun shown in light mode, moon in dark) */
+:root[data-theme='dark'] .theme-icon-sun { display: none; }
+:root[data-theme='dark'] .theme-icon-moon { display: inline-flex; }
+
+/* The glossy top-sheen overlay is tuned for a white card - far too bright
+   against a dark card, so it's toned way down rather than removed
+   entirely (keeps a hint of the same raised, glassy 3D feel). */
+:root[data-theme='dark'] .printer-card::before {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 32%);
+}
+
+/* Brand watermark should stay faint but visible against a dark card */
+:root[data-theme='dark'] .brand-watermark {
+  color: #ffffff;
+  opacity: 0.05;
+}
+
+/* Offline alert: same "light red gradient" concept, re-tuned as a muted
+   dark red-tinted card so it still reads as an alert against a dark page
+   instead of looking like a jarring bright patch. */
+:root[data-theme='dark'] .printer-card.status-offline {
+  background: linear-gradient(155deg, #2a1414 0%, #331616 55%, #3d1919 100%);
+}
+
+/* Vendor badges: light-mode pastel chips are too washed-out on dark cards */
+:root[data-theme='dark'] .vendor-badge.vendor-hp {
+  background: rgba(60, 130, 246, 0.16);
+  border-color: rgba(60, 130, 246, 0.35);
+  color: #7fb0ff;
+}
+:root[data-theme='dark'] .vendor-badge.vendor-canon {
+  background: rgba(255, 90, 80, 0.14);
+  border-color: rgba(255, 90, 80, 0.32);
+  color: #ff9a90;
+}
+
+/* Yellow toner letter badge needs a dark label in both themes for
+   contrast - already handled by the existing rule, restated here only if
+   the base --y-color changes enough to need it (kept for clarity). */
+:root[data-theme='dark'] .toner-gauge[data-channel='y'] .gauge-letter {
+  color: #3a2e00;
+}
